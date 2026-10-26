@@ -46,10 +46,10 @@ const conf={
 function home(){
  $('#app').innerHTML='<header><div class="logo"><span>PFI</span> Intelligence <span class="subbrand">Pinnacle Financial USA · Technology demonstration</span></div><div class="toplinks"><a href="construction.html">Construction</a><a href="uvexa.html">Uvexa</a><span class="pill">SYNTHETIC DATA</span></div></header><div class="home"><section class="hero"><div class="eyebrow">Executive demonstration suite</div><h1>From operations to<br>better financial decisions.</h1><p>Explore interactive demonstrations of PFI Construction Intelligence and Uvexa Utility Intelligence. Navigate the services, open records, and test the guided workflows.</p></section><div class="cards2"><section class="home-card"><div class="eyebrow">01 / Construction</div><h2>Construction Intelligence</h2><p>Sales pipeline, approved budgets, field evidence, job cost intelligence, AIA billing and collections.</p><a href="construction.html" class="btn">Open Construction Services</a></section><section class="home-card"><div class="eyebrow">02 / Utility operations</div><h2>Uvexa</h2><p>Lead management, estimates, installations, consumption monitoring, invoice preview and financial exceptions.</p><a href="uvexa.html" class="btn">Open Uvexa Services</a></section></div><div class="notice">Presentation environment. All records are synthetic, and demo actions run in this browser only. No live customer data, payment processing, external billing connections or accounting postings.</div><p class="foot">PFI Technologies · Financial Intelligence for Better Decisions</p></div>';
 }
+let state,page='overview',filter='',modal=null,step=0;
 if(mode==='home'){home()}
 else if(conf[mode]){init()}
 function initial(){return JSON.parse(JSON.stringify(seed[mode]))}
-let state,page='overview',filter='',modal=null,step=0;
 function init(){
  try{const raw=localStorage.getItem('pfi-demo-'+mode+'-v3');state=raw?JSON.parse(raw):initial();if(!Array.isArray(state.leads)||!Array.isArray(state.jobs))state=initial()}catch(e){state=initial()}
  const c=conf[mode];
