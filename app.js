@@ -41,7 +41,7 @@ const seed={
 };
 const conf={
  construction:{label:'Construction Intelligence',short:'PFI Construction',sub:'Project controls | Revenue | Field operations',items:[['overview','Executive Overview'],['pipeline','Sales Pipeline'],['estimates','Estimates & Approvals'],['installations','Project & Field Operations'],['jobcost','Job Cost Intelligence'],['billing','AIA Billing & Collections'],['intelligence','Executive Intelligence'],['exports','Data Portability']]},
- uvexa:{label:'Uvexa Utility Intelligence',short:'Uvexa',sub:'Utility operations | Billing | Financial intelligence',items:[['overview','Executive Overview'],['pipeline','Sales Pipeline'],['estimates','Estimates & Approvals'],['installations','Installations & Work Orders'],['meters','Meter Monitoring'],['billing','Billing & Invoices'],['collections','Collections'],['intelligence','Financial Intelligence'],['exports','Data Portability']]}
+ uvexa:{label:'Uvexa Utility Intelligence',short:'Uvexa',sub:'Utility operations | Billing | Financial intelligence',items:[['overview','Executive Overview'],['pipeline','Sales Pipeline'],['estimates','Estimates & Approvals'],['installations','Installations & Work Orders'],['meters','Meter Monitoring'],['billing','Billing & Invoices'],['collections','Collections'],['intelligence','Financial Intelligence'],['core','Uvexa Core'],['revenue','Uvexa Intelligence'],['enterprise','Uvexa Enterprise'],['exports','Data Portability']]}
 };
 function home(){
  $('#app').innerHTML='<header><div class="logo"><span>PFI</span> Intelligence <span class="subbrand">Pinnacle Financial USA · Technology demonstration</span></div><div class="toplinks"><a href="construction.html">Construction</a><a href="uvexa.html">Uvexa</a><span class="pill">SYNTHETIC DATA</span></div></header><div class="home"><section class="hero"><div class="eyebrow">Executive demonstration suite</div><h1>From operations to<br>better financial decisions.</h1><p>Explore interactive demonstrations of PFI Construction Intelligence and Uvexa Utility Intelligence. Navigate the services, open records, and test the guided workflows.</p></section><div class="cards2"><section class="home-card"><div class="eyebrow">01 / Construction</div><h2>Construction Intelligence</h2><p>Sales pipeline, approved budgets, field evidence, job cost intelligence, AIA billing and collections.</p><a href="construction.html" class="btn">Open Construction Services</a></section><section class="home-card"><div class="eyebrow">02 / Utility operations</div><h2>Uvexa</h2><p>Lead management, estimates, installations, consumption monitoring, invoice preview and financial exceptions.</p><a href="uvexa.html" class="btn">Open Uvexa Services</a></section></div><div class="notice">Presentation environment. All records are synthetic, and demo actions run in this browser only. No live customer data, payment processing, external billing connections or accounting postings.</div><p class="foot">PFI Technologies · Financial Intelligence for Better Decisions</p></div>';
@@ -84,14 +84,14 @@ const descriptions={
  meters:'Meter readings, consumption anomalies and exception disposition.',
  billing:mode==='uvexa'?'Review billing accounts and calculate sample invoice previews.':'Keep AIA applications, collections and retainage visible.',
  collections:'Outstanding balances and simulated collection disposition.',
- intelligence:'Trace risks to financial effects and recommended next actions.',
+ intelligence:'Trace risks to financial effects and recommended next actions.',core:'Billing integrity, account identity and missing invoice exceptions.',revenue:'Usage investigations, associated invoice exposure and evidence-based review.',enterprise:'Enterprise controls, tenant isolation, portability and integrations readiness.',
  exports:'Export synthetic demonstration data and keep information portable.'
 };
 function render(){
  const selected=conf[mode].items.find(([id])=>id===page);
  $('#page-title').textContent=selected?selected[1]:'Executive Overview';$('#page-desc').textContent=descriptions[page]||'';
  document.querySelectorAll('[data-nav]').forEach(b=>{b.classList.toggle('active',b.dataset.nav===page);b.setAttribute('aria-current',b.dataset.nav===page?'page':'false')});
- const fn={overview:overview,pipeline:pipeline,estimates:estimates,installations:installations,jobcost:jobcost,meters:meters,billing:billing,collections:collections,intelligence:intelligence,exports:exports}[page]||overview;
+ const fn={overview:overview,pipeline:pipeline,estimates:estimates,installations:installations,jobcost:jobcost,meters:meters,billing:billing,collections:collections,intelligence:intelligence,core:uvexaCore,revenue:uvexaRevenue,enterprise:uvexaEnterprise,exports:exports}[page]||overview;
  $('#content').innerHTML=fn();
 }
 function overview(){
@@ -141,6 +141,35 @@ function intelligence(){
  ['Proposal aging','Prioritize oldest unawarded opportunities before forecasting backlog.','Pipeline']
  ];
  return metrics([['Actionable review items',String(risks.length),'Synthetic findings'],['Source traceability','Available','Fixture records'],['Unexplained transactions','Blocked','No live posting'],['Projected impact','Review required','No unsupported forecast']])+panel('Evidence → Cause → Recommended Action',risks.map(([name,action,ref])=>'<div class="insight"><b>'+esc(name)+'</b><div class="mini muted">Evidence reference: '+esc(ref)+'</div><p>'+esc(action)+'</p></div>').join(''))+panel('Financial Control Philosophy','<p>Identifying anomalies is not enough. Uvexa and PFI Construction should connect each decision to source evidence, financial effect, responsible owner and an approved next action.</p><p class="notice">This browser demonstration is illustrative. No AI agent or financial forecasting model is invoked by this page.</p>');
+}
+function uvexaCore(){
+ const t=state.meters,i=state.invoices,accounts=t.map(x=>x.account),dupes=accounts.filter((x,k)=>accounts.indexOf(x)!==k),billed=new Set(i.map(x=>x.account));
+ const missing=t.filter(x=>!billed.has(x.account));
+ const incomplete=t.filter(x=>!x.account||!x.customer||!x.id);
+ return metrics([['Tenant accounts',String(t.length),'Demo accounts'],['Duplicate account IDs',String(dupes.length),'Integrity check'],['No invoice in sample',String(missing.length),'Review billing cycle'],['Incomplete records',String(incomplete.length),'Account completeness']])+
+ panel('Billing integrity dashboard','<p>Account numbers must be unique within their business customer. Missing invoices require verification against activation dates, billing cycles and account status.</p>'+htmlTable(['Account','Property or unit','Invoice present','Status'],t.map(x=>'<tr><td>'+esc(x.account)+'</td><td>'+esc(x.customer)+'</td><td>'+status(billed.has(x.account)?'Yes':'Not in sample',billed.has(x.account)?'ok':'warn')+'</td><td>'+button('meter',x.id,'Review account')+'</td></tr>')))+ '<p class="notice">Loaded sample invoices are not a complete billing-cycle ledger. Results indicate reviews, not proven missing charges.</p>';
+}
+function uvexaRevenue(){
+ const alerts=state.meters.filter(x=>meterStatus(x)&&!x.reviewed),flagged=new Set(alerts.map(x=>x.account)),invoiceList=state.invoices.filter(x=>flagged.has(x.account)),exposure=invoiceList.reduce((v,x)=>v+x.amount,0);
+ return metrics([['Open usage alerts',String(alerts.length),'Investigation queue'],['Linked invoice exposure',usd2(exposure),'Associated invoice values'],['Affected accounts',String(flagged.size),'Not confirmed loss'],['Validated recovery','$0.00','No recovery verified']])+
+ panel('Usage-alert investigation queue',htmlTable(['Account','Meter','Exception','Invoice exposure','Next action'],alerts.map(x=>'<tr><td>'+esc(x.account)+'</td><td>'+esc(x.id)+'</td><td>'+status(meterStatus(x),'bad')+'</td><td>'+usd2(state.invoices.filter(i=>i.account===x.account).reduce((v,i)=>v+i.amount,0))+'</td><td>'+button('meter',x.id,'Investigate evidence')+'</td></tr>')))+
+ '<p class="notice">Invoice exposure does not equal lost revenue. Each finding requires meter, tariff, account and invoice validation before financial impact is calculated.</p>'+
+ panel('Evidence-based actions','<div class="insight"><b>Read → Validation → Invoice → Recommendation</b>Investigate anomalous usage, validate the underlying readings and rates, then document the action before approving any charge.</div>');
+}
+function uvexaEnterprise(){
+ const rows=[
+ ['White-label client portals','Design and branding provisioning not enabled'],
+ ['Company data isolation','Per-company API, storage and background-job tests required'],
+ ['Role-based permissions','Production authorization and separation of duties required'],
+ ['Customer-controlled exports','Completeness, secure delivery and retention acceptance required'],
+ ['Encryption and audit controls','Encryption, access logging and backup recovery must be verified'],
+ ['QuickBooks, Oracle and SAP','Integrations not connected in this hosted demo'],
+ ['SOC 2 and ISO 27001','Control alignment is a target, not a certification'],
+ ['Disaster recovery','SLA, recovery tests and incident runbooks outstanding']
+ ];
+ return metrics([['Client companies','Demo only','No production tenants'],['Export tools','Available','Synthetic CSV only'],['Integration status','Not connected','No ERP connection'],['Certification','Not claimed','Security controls need audit']])+
+ panel('Enterprise readiness dashboard',htmlTable(['Capability','Readiness / required validation'],rows.map(r=>'<tr><td><b>'+esc(r[0])+'</b></td><td>'+esc(r[1])+'</td></tr>')))+
+ panel('Customer ownership and isolation','<p>AW is one licensed business customer and could manage thousands of end-customer accounts. Each business customer must have isolated tenant data and permissioned exports.</p><p class="notice">This demo does not implement enterprise SSO, tenant isolation, payment processing, secure evidence storage or live integrations.</p>');
 }
 function exports(){
  return panel('Data Portability','<p class="muted">Export sample records for review. Downloads include only browser-local synthetic demonstration data.</p><div class="row">'+button('export','leads','Download lead CSV')+' '+button('export','jobs','Download jobs CSV')+' '+(mode==='uvexa'?button('export','meters','Download meters CSV'):'')+' '+button('export','invoices','Download invoice CSV')+'</div><hr><div class="row">'+button('reset','all','Reset demo to original synthetic data')+'</div><p class="notice">This hosted demo cannot connect to Starnik, QuickBooks, real customer data or the M1 development database.</p>');
