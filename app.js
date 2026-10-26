@@ -41,7 +41,7 @@ const seed={
 };
 const conf={
  construction:{label:'Construction Intelligence',short:'PFI Construction',sub:'Project controls | Revenue | Field operations',items:[['overview','Executive Overview'],['pipeline','Sales Pipeline'],['estimates','Estimates & Approvals'],['installations','Project & Field Operations'],['jobcost','Job Cost Intelligence'],['billing','AIA Billing & Collections'],['intelligence','Executive Intelligence'],['exports','Data Portability']]},
- uvexa:{label:'Uvexa Utility Intelligence',short:'Uvexa',sub:'Utility operations | Billing | Financial intelligence',items:[['overview','Executive Overview'],['pipeline','Sales Pipeline'],['estimates','Estimates & Approvals'],['installations','Installations & Work Orders'],['meters','Meter Monitoring'],['billing','Billing & Invoices'],['collections','Collections'],['intelligence','Financial Intelligence'],['core','Uvexa Core'],['revenue','Uvexa Intelligence'],['enterprise','Uvexa Enterprise'],['exports','Data Portability']]}
+ uvexa:{label:'Uvexa Utility Intelligence',short:'Uvexa',sub:'Utility operations | Billing | Financial intelligence',items:[['overview','Executive Overview'],['pipeline','Sales Pipeline'],['estimates','Estimates & Approvals'],['installations','Installations & Work Orders'],['meters','Meter Monitoring'],['map','Service Area Map'],['billing','Billing & Invoices'],['collections','Collections'],['intelligence','Financial Intelligence'],['core','Uvexa Core'],['revenue','Uvexa Intelligence'],['enterprise','Uvexa Enterprise'],['exports','Data Portability']]}
 };
 function home(){
  $('#app').innerHTML='<header><div class="logo"><span>PFI</span> Intelligence <span class="subbrand">Pinnacle Financial USA · Technology demonstration</span></div><div class="toplinks"><a href="construction.html">Construction</a><a href="uvexa.html">Uvexa</a><span class="pill">SYNTHETIC DATA</span></div></header><div class="home"><section class="hero"><div class="eyebrow">Executive demonstration suite</div><h1>From operations to<br>better financial decisions.</h1><p>Explore interactive demonstrations of PFI Construction Intelligence and Uvexa Utility Intelligence. Navigate the services, open records, and test the guided workflows.</p></section><div class="cards2"><section class="home-card"><div class="eyebrow">01 / Construction</div><h2>Construction Intelligence</h2><p>Sales pipeline, approved budgets, field evidence, job cost intelligence, AIA billing and collections.</p><a href="construction.html" class="btn">Open Construction Services</a></section><section class="home-card"><div class="eyebrow">02 / Utility operations</div><h2>Uvexa</h2><p>Lead management, estimates, installations, consumption monitoring, invoice preview and financial exceptions.</p><a href="uvexa.html" class="btn">Open Uvexa Services</a></section></div><div class="notice">Presentation environment. All records are synthetic, and demo actions run in this browser only. No live customer data, payment processing, external billing connections or accounting postings.</div><p class="foot">PFI Technologies · Financial Intelligence for Better Decisions</p></div>';
@@ -79,7 +79,7 @@ const descriptions={
  estimates:'Cost assumptions, margin protection, approvals and controlled synthetic conversions.',
  installations:'Project and field execution, job progress and evidence.',
  jobcost:'Budget, actual cost, commitments and remaining headroom by project.',
- meters:'Meter readings, consumption anomalies and exception disposition.',
+ meters:'Meter readings, consumption anomalies and exception disposition.',map:'Interactive geographic map of illustrative service zones and meter locations.',
  billing:mode==='uvexa'?'Review billing accounts and calculate sample invoice previews.':'Keep AIA applications, collections and retainage visible.',
  collections:'Outstanding balances and simulated collection disposition.',
  intelligence:'Trace risks to financial effects and recommended next actions.',core:'Billing integrity, account identity and missing invoice exceptions.',revenue:'Usage investigations, associated invoice exposure and evidence-based review.',enterprise:'Enterprise controls, tenant isolation, portability and integrations readiness.',
@@ -89,8 +89,8 @@ function render(){
  const selected=conf[mode].items.find(([id])=>id===page);
  $('#page-title').textContent=selected?selected[1]:'Executive Overview';$('#page-desc').textContent=descriptions[page]||'';
  document.querySelectorAll('[data-nav]').forEach(b=>{b.classList.toggle('active',b.dataset.nav===page);b.setAttribute('aria-current',b.dataset.nav===page?'page':'false')});
- const fn={overview:overview,pipeline:pipeline,estimates:estimates,installations:installations,jobcost:jobcost,meters:meters,billing:billing,collections:collections,intelligence:intelligence,core:uvexaCore,revenue:uvexaRevenue,enterprise:uvexaEnterprise,exports:exports}[page]||overview;
- $('#content').innerHTML=fn();
+ const fn={overview:overview,pipeline:pipeline,estimates:estimates,installations:installations,jobcost:jobcost,meters:meters,map:()=>window.PFIUtilityMap.view(),billing:billing,collections:collections,intelligence:intelligence,core:uvexaCore,revenue:uvexaRevenue,enterprise:uvexaEnterprise,exports:exports}[page]||overview;
+ $('#content').innerHTML=fn();if(page==='map')window.PFIUtilityMap.init();
 }
 function overview(){
  const pipelineValue=state.leads.reduce((a,j)=>a+j.value,0);
